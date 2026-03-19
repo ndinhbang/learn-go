@@ -1,0 +1,22 @@
+{
+    "recommendations": [
+        "ryu1kn.partial-diff",
+        "quicktype.quicktype",
+        "ahmadalli.vscode-nginx-conf",
+        "shd101wyy.markdown-preview-enhanced",
+        "ms-vscode.hexeditor",
+        "mateuszchudyk.hexinspector",
+        "nhoizey.gremlins",
+        "golang.go",
+        "huizhou.githd",
+        "gxl.git-graph-3",
+        "editorconfig.editorconfig",
+        "ms-vscode-remote.remote-wsl",
+        "azemoh.one-monokai",
+        "fogio.jetbrains-product-icon-theme",
+        "mikestead.dotenv",
+        "ms-vscode-remote.remote-containers",
+        "alefragnani.bookmarks",
+        "wmaurer.change-case"
+    ]
+}
