@@ -17,6 +17,7 @@
         "mikestead.dotenv",
         "ms-vscode-remote.remote-containers",
         "alefragnani.bookmarks",
-        "wmaurer.change-case"
+        "wmaurer.change-case",
+        "numlia-vs.git-keizu"
     ]
 }
