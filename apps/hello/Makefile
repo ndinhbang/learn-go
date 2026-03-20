@@ -2,13 +2,13 @@
 ## Usage: make build
 .PHONY: build
 build:
-	go build -o bin/hello-world .
+	go build -o bin/hello .
 
 ## Run the application
 ## Usage: make run
 .PHONY: run
 run:
-	./bin/hello-world
+	./bin/hello
 
 ## Install the application
 ## Usage: make install
@@ -21,8 +21,8 @@ install:
 ## Note: $$ trong Makefile → $ trong shell (để dùng biến môi trường GOBIN).
 .PHONY: uninstall
 uninstall:
-	@if [ -n "$$GOBIN" ]; then rm -f "$$GOBIN/hello-world"; fi
-	rm -f "$$(go env GOPATH)/bin/hello-world"
+	@if [ -n "$$GOBIN" ]; then rm -f "$$GOBIN/hello"; fi
+	rm -f "$$(go env GOPATH)/bin/hello"
 
 ## Run the tests
 ## Usage: make test
