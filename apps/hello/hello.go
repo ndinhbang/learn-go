@@ -1,11 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
 
-func HelloWorld() {
-	fmt.Println("Hello, World!")
-}
+	"github.com/ndinhbang/learn-go/pkg/greetings"
+)
 
 func main() {
-	HelloWorld()
+	// Get a greeting message and print it.
+	message := greetings.Hello("Bang")
+	fmt.Println(message)
 }
