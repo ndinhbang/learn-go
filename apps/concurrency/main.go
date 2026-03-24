@@ -12,7 +12,7 @@ func infiniteCount(thing string) {
 	}
 }
 
-// The program counts "dog" forever and never gets to "cat".
+// Using goroutines: "dog" is counted in the background.
 func main() {
 	go infiniteCount("dog")
 	infiniteCount("cat")
