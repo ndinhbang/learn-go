@@ -2,26 +2,85 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"strings"
+	"sync"
+	"unicode"
 )
+
+// Create a function countDigitsInWords that takes an input string,
+// splits it into words, and counts the digits in each word using countDigits.
+// Be sure to do the counting for each word in a separate goroutine.
+
+// countDigits returns the number of digits in a string.
+func countDigits(str string) int {
+	count := 0
+	for _, char := range str {
+		if unicode.IsDigit(char) {
+			count++
+		}
+	}
+	return count
+}
+
+// counter stores the number of digits in each word.
+// The key is the word, and the value is the number of digits.
+type counter map[string]int
+
+func countDigitsInWords(phrase string) counter {
+	countChan := make(chan int)
+	words := strings.FieldsSeq(phrase) // Split the phrase into words using FieldsSeq to handle multiple spaces.
+
+	for word := range words {
+		go func() {
+			count := countDigits(word)
+			countChan <- count
+		}()
+	}
+
+	stats := counter{}
+
+	for word := range words {
+		count := <-countChan
+		stats[word] = count
+	}
+
+	return stats
+}
+
+// asStats converts statistics from sync.Map to a regular map.
+func asStats(m *sync.Map) counter {
+	stats := counter{}
+	m.Range(func(word, count any) bool {
+		stats[word.(string)] = count.(int)
+		return true
+	})
+	return stats
+}
+
+// printStats prints the number of digits in words.
+func printStats(stats counter) {
+	for word, count := range stats {
+		fmt.Printf("%s: %d\n", word, count)
+	}
+}
 
 // Running both count functions as goroutines.
 func main() {
-	messages := make(chan string)
+	str := "one,two,,four"
 
-	go func() {
-		fmt.Println("B: Sending message...")
-		messages <- "ping"              // (1) After sending the message to the channel, goroutine B gets blocked
-		fmt.Println("B: Message sent!") // (2) This line will not be executed until goroutine A receives the message from the channel
+	in := make(chan string)
+	go func() { // (1)
+		words := strings.Split(str, ",")
+		for _, word := range words {
+			in <- word
+		}
 	}()
 
-	fmt.Println("A: Doing some work...")
-	time.Sleep(500 * time.Millisecond)
-	fmt.Println("A: Ready to receive a message...")
-
-	<-messages //  (3) Goroutine A receives the message from the channel, unblocking goroutine B and allowing it to continue its execution. After receiving the message, goroutine A can proceed with its work.
-
-	fmt.Println("A: Messege received!")
-	time.Sleep(100 * time.Millisecond)
-
+	for { // (2)
+		word := <-in
+		if word != "" {
+			fmt.Printf("%s ", word)
+		}
+	}
+	// one two four
 }
