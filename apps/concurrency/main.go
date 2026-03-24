@@ -12,8 +12,9 @@ func infiniteCount(thing string) {
 	}
 }
 
-// Using goroutines: "dog" is counted in the background.
+// Running both count functions as goroutines.
 func main() {
 	go infiniteCount("dog")
-	infiniteCount("cat")
+	go infiniteCount("cat")
+
 }
