@@ -23,15 +23,7 @@ func main() {
 		close(in)
 	}()
 
-	for { // (2)
-		// receive from the channel
-		word, ok := <-in
-		// if the channel is closed, break the loop
-		// if the channel is closed, the ok will be false
-		// if the channel is not closed, the ok will be true
-		if !ok {
-			break
-		}
+	for word := range in {
 		fmt.Printf("%s ", word)
 	}
 }
