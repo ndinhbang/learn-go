@@ -14,6 +14,6 @@ func infiniteCount(thing string) {
 
 // The program counts "dog" forever and never gets to "cat".
 func main() {
-	infiniteCount("dog")
+	go infiniteCount("dog")
 	infiniteCount("cat")
 }
