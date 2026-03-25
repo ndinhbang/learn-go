@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -44,21 +45,24 @@ func work(done chan<- struct{}, out chan<- int) {
 }
 
 func main() {
-	out := make(chan int)
-	done := make(chan struct{})
+	stream := make(chan bool)
 
-	go work(done, out) // (1)
-
-	go func() {
-		<-done
-		fmt.Println("work done")
-		close(out) // nếu không close, thì range out sẽ không biết khi nào dừng
-
-	}()
-
-	for n := range out { // (3)
-		fmt.Println(n)
+	send := func() {
+		fmt.Println("sender: ready to send...")
+		stream <- true // (1)
+		fmt.Println("sender: sent!")
 	}
 
-	fmt.Println("all goroutines done")
+	receive := func() {
+		fmt.Println("receiver: not ready yet...")
+		time.Sleep(100 * time.Millisecond)
+		fmt.Println("receiver: ready to receive...")
+		<-stream // (2)
+		fmt.Println("receiver: received!")
+	}
+
+	var wg sync.WaitGroup
+	wg.Go(send)
+	wg.Go(receive)
+	wg.Wait()
 }
