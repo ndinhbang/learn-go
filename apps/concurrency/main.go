@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -44,25 +43,42 @@ func work(done chan<- struct{}, out chan<- int) {
 	// close(done)
 }
 
+// async converts a regular function to an asynchronous one.
+// An asynchronous function returns a result channel when called.
+func async(fn func() any) func() <-chan any {
+	return func() <-chan any {
+		out := make(chan any, 1)
+		go func() {
+			out <- fn()
+		}()
+		return out
+	}
+}
+
+// await waits for the result of an asynchronous function
+// on the given channel.
+func await(in <-chan any) any {
+	return <-in
+}
 func main() {
-	stream := make(chan bool, 1)
-
-	send := func() {
-		fmt.Println("sender: ready to send...")
-		stream <- true // (1)
-		fmt.Println("sender: sent!")
-	}
-
-	receive := func() {
-		fmt.Println("receiver: not ready yet...")
+	fn := func() any {
 		time.Sleep(100 * time.Millisecond)
-		fmt.Println("receiver: ready to receive...")
-		<-stream // (2)
-		fmt.Println("receiver: received!")
+		return "okay"
 	}
 
-	var wg sync.WaitGroup
-	wg.Go(send)
-	wg.Go(receive)
-	wg.Wait()
+	slowpoke := async(fn) // create an asynchronous function
+
+	start := time.Now()
+	slowpoke()                  // does not block
+	slowpoke()                  // does not block
+	slowpoke()                  // does not block
+	result := await(slowpoke()) // blocks until the result is ready
+
+	elapsed := time.Since(start)
+	fmt.Println(result)
+	fmt.Println("took", elapsed)
+	// okay
+	// took 100ms
+
+	// total execution time is 100ms, not 400ms
 }
