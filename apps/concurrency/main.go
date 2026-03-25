@@ -38,9 +38,9 @@ func work(done chan<- struct{}, out chan<- int) {
 	for i := 1; i <= 5; i++ {
 		out <- i
 	}
-	close(out)
+	// close(out)
 	done <- struct{}{}
-	close(done)
+	// close(done)
 }
 
 func main() {
@@ -49,11 +49,16 @@ func main() {
 
 	go work(done, out) // (1)
 
+	go func() {
+		<-done
+		fmt.Println("work done")
+		close(out) // nếu không close, thì range out sẽ không biết khi nào dừng
+
+	}()
+
 	for n := range out { // (3)
 		fmt.Println(n)
 	}
-
-	<-done // (2)
 
 	fmt.Println("all goroutines done")
 }
