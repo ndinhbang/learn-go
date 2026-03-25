@@ -45,8 +45,8 @@ func work(done chan<- struct{}, out chan<- int) {
 
 // async converts a regular function to an asynchronous one.
 // An asynchronous function returns a result channel when called.
-func async(fn func() any) func() <-chan any {
-	return func() <-chan any {
+func async(fn func() any) func() chan any {
+	return func() chan any {
 		out := make(chan any, 1)
 		go func() {
 			out <- fn()
@@ -60,25 +60,59 @@ func async(fn func() any) func() <-chan any {
 func await(in <-chan any) any {
 	return <-in
 }
+
+// PromiseAll nhận vào một slice các channels và trả về một channel chứa slice kết quả
+func PromiseAll(channels ...<-chan any) <-chan any {
+	out := make(chan any, 1)
+
+	go func() {
+		results := make([]any, len(channels))
+
+		// Sử dụng một cơ chế để đợi tất cả các goroutine hoàn thành
+		// Ở đây ta có thể đọc trực tiếp từ từng channel theo thứ tự
+		for i, ch := range channels {
+			results[i] = <-ch // Đợi từng channel trả về kết quả
+		}
+
+		out <- results // Gửi mảng kết quả cuối cùng vào channel đầu ra
+		close(out)
+	}()
+
+	return out
+}
+
 func main() {
-	fn := func() any {
+	// Giả lập các tác vụ tốn thời gian khác nhau
+	task1 := func() any {
+		time.Sleep(200 * time.Millisecond)
+		return "Task 1 xong"
+	}
+	task2 := func() any {
 		time.Sleep(100 * time.Millisecond)
-		return "okay"
+		return "Task 2 xong"
+	}
+	task3 := func() any {
+		time.Sleep(300 * time.Millisecond)
+		return 500 // Trả về số
 	}
 
-	slowpoke := async(fn) // create an asynchronous function
-
 	start := time.Now()
-	slowpoke()                  // does not block
-	slowpoke()                  // does not block
-	slowpoke()                  // does not block
-	result := await(slowpoke()) // blocks until the result is ready
+
+	// Kích hoạt các hàm async (tương đương việc tạo các Promise trong JS)
+	p1 := async(task1)()
+	p2 := async(task2)()
+	p3 := async(task3)()
+
+	fmt.Println("Đang chạy song song...")
+
+	// Sử dụng PromiseAll để đợi tất cả
+	allResults := await(PromiseAll(p1, p2, p3))
 
 	elapsed := time.Since(start)
-	fmt.Println(result)
-	fmt.Println("took", elapsed)
-	// okay
-	// took 100ms
 
-	// total execution time is 100ms, not 400ms
+	fmt.Printf("Kết quả: %v\n", allResults)
+	fmt.Printf("Tổng thời gian: %s\n", elapsed)
+
+	// Giải thích: Tổng thời gian sẽ rơi vào khoảng 300ms (thời gian của task lâu nhất)
+	// thay vì 600ms (tổng thời gian 3 task cộng lại).
 }
