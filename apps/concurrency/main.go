@@ -34,11 +34,13 @@ func say(done chan struct{}, id int, phrase string) {
 	done <- struct{}{} // send a signal to the channel to indicate that the phrase is done
 }
 
-func work(done chan struct{}, out chan int) {
+func work(done chan<- struct{}, out chan<- int) {
 	for i := 1; i <= 5; i++ {
 		out <- i
 	}
+	close(out)
 	done <- struct{}{}
+	close(done)
 }
 
 func main() {
@@ -47,9 +49,11 @@ func main() {
 
 	go work(done, out) // (1)
 
-	<-done // (2)
-
 	for n := range out { // (3)
 		fmt.Println(n)
 	}
+
+	<-done // (2)
+
+	fmt.Println("all goroutines done")
 }
