@@ -376,6 +376,19 @@ wg.Wait()
 - [ ] `default` case
 - [ ] Timeout patterns
 
+### 6.5 Concurrency Patterns
+- [ ] Signal
+- [ ] Generator
+- [ ] Pipeline
+- [ ] Fan-out/Fan-in
+- [ ] Queue
+- [ ] Worker pool
+- [ ] Tee channel
+- [ ] Bridge channel
+- [ ] Ring buffer channel
+- [ ] Bounded parallelism
+- [ ] Semaphore
+
 ---
 
 ## 📚 Phần 7: Standard Library
