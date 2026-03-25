@@ -45,7 +45,7 @@ func work(done chan<- struct{}, out chan<- int) {
 }
 
 func main() {
-	stream := make(chan bool)
+	stream := make(chan bool, 1)
 
 	send := func() {
 		fmt.Println("sender: ready to send...")
