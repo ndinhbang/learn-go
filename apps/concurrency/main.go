@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -81,38 +82,29 @@ func PromiseAll(channels ...<-chan any) <-chan any {
 	return out
 }
 
+func workerTask(id int, p string) {
+	fmt.Printf("[Worker %d] Đang xử lý: %s\n", id, p)
+	time.Sleep(1 * time.Second) // Giả lập công việc nặng
+}
+
 func main() {
-	// Giả lập các tác vụ tốn thời gian khác nhau
-	task1 := func() any {
-		time.Sleep(200 * time.Millisecond)
-		return "Task 1 xong"
+	phrases := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"}
+	var wg sync.WaitGroup
+	maxConcurrency := 3
+	sema := make(chan struct{}, maxConcurrency) // Dùng struct{} để tiết kiệm bộ nhớ
+
+	for i, p := range phrases {
+		wg.Add(1)
+		sema <- struct{}{} // "Lấy chỗ" - Nếu đủ 3 chỗ rồi, nó sẽ đợi ở đây
+
+		go func(id int, phrase string) {
+			defer wg.Done()           //
+			defer func() { <-sema }() // "Trả chỗ" khi làm xong
+
+			workerTask(id, phrase)
+		}(i, p)
 	}
-	task2 := func() any {
-		time.Sleep(100 * time.Millisecond)
-		return "Task 2 xong"
-	}
-	task3 := func() any {
-		time.Sleep(300 * time.Millisecond)
-		return 500 // Trả về số
-	}
 
-	start := time.Now()
-
-	// Kích hoạt các hàm async (tương đương việc tạo các Promise trong JS)
-	p1 := async(task1)()
-	p2 := async(task2)()
-	p3 := async(task3)()
-
-	fmt.Println("Đang chạy song song...")
-
-	// Sử dụng PromiseAll để đợi tất cả
-	allResults := await(PromiseAll(p1, p2, p3))
-
-	elapsed := time.Since(start)
-
-	fmt.Printf("Kết quả: %v\n", allResults)
-	fmt.Printf("Tổng thời gian: %s\n", elapsed)
-
-	// Giải thích: Tổng thời gian sẽ rơi vào khoảng 300ms (thời gian của task lâu nhất)
-	// thay vì 600ms (tổng thời gian 3 task cộng lại).
+	wg.Wait()
+	fmt.Println("All workers done")
 }
