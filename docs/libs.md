@@ -45,6 +45,11 @@ https://github.com/open-telemetry/opentelemetry-go
 ### Assertions:
 https://github.com/stretchr/testify
 
+### JSON:
+https://github.com/bytedance/sonic
+https://github.com/mailru/easyjson
+encoding/json
+
 ### Miscellaneous:
 https://github.com/go-task/task
 https://github.com/golangci/golangci-lint
@@ -59,3 +64,8 @@ https://github.com/oklog/ulid
 https://github.com/failsafe-go/failsafe-go
 https://github.com/mvdan/xurls
 https://github.com/redis/rueidis
+https://staticcheck.dev/docs/
+https://github.com/oklog/run
+https://github.com/hibiken/asynq
+https://github.com/uber-go/goleak
+go/cfg
